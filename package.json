@@ -7,8 +7,8 @@
   "scripts": {
     "build": "node scripts/copy-vendor.mjs",
     "test": "node --test test/*.test.mjs",
-    "dev": "npm run build && npx --yes wrangler pages dev public",
-    "deploy": "npm run build && npx --yes wrangler pages deploy public"
+    "dev": "npx --yes wrangler dev",
+    "deploy": "npx --yes wrangler deploy"
   },
   "dependencies": {
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"

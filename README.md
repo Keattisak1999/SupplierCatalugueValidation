@@ -52,14 +52,15 @@ npm run dev        # local preview with wrangler
 - `public/js/app.js` holds the UI.
 - `public/js/units.js` holds the FutureLog unit list, generated from `data/Unit_List.xls`.
 
-## Deploy to Cloudflare Pages
+## Deploy to Cloudflare
 
-**Option A: Cloudflare Git integration (no secrets in GitHub)**
-In Cloudflare, go to *Workers & Pages → Create → Pages → Connect to Git* and select this repository. Use these settings:
-- Build command: `npm run build`
-- Build output directory: `public`
+The site is a Cloudflare **Workers static-assets** site, configured in `wrangler.toml`. `npx wrangler deploy` runs `npm run build` itself and then uploads `public/`.
+
+**Option A: Cloudflare Git integration (recommended)**
+In Cloudflare, go to *Workers & Pages → Create → Import a repository* and select this repository. Use these settings:
+- Build command: leave empty, or use `npm run build`
+- Deploy command: `npx wrangler deploy`
+- The Worker name must match `name` in `wrangler.toml` (`suppliercataluguevalidation`). If you pick another name, change `wrangler.toml` to match.
 
 **Option B: GitHub Actions** (`.github/workflows/deploy.yml`)
-1. Create a Pages project named `supplier-catalogue-validation`, or change `--project-name` in the workflow.
-2. Add the repository secrets `CLOUDFLARE_API_TOKEN` (with the *Cloudflare Pages: Edit* permission) and `CLOUDFLARE_ACCOUNT_ID`.
-3. Every push to `main` runs the tests and deploys. Pull requests run the tests only. The deploy step is skipped until the secrets exist.
+Add the repository secrets `CLOUDFLARE_API_TOKEN` (with the *Workers Scripts: Edit* permission) and `CLOUDFLARE_ACCOUNT_ID`. Every push to `main` runs the tests and deploys. Pull requests run the tests only. The deploy step is skipped until the secrets exist.

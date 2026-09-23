@@ -1,3 +1,9 @@
-name = "supplier-catalogue-validation"
+# Cloudflare Workers static-assets site. `npx wrangler deploy` runs the build, then uploads ./public.
+name = "suppliercataluguevalidation"
 compatibility_date = "2026-09-01"
-pages_build_output_dir = "public"
+
+[build]
+command = "npm run build"
+
+[assets]
+directory = "./public"
