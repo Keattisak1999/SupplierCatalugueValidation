@@ -40,8 +40,8 @@ Matching ignores upper/lower case and spaces before or after the value.
 ## Development
 
 ```bash
-npm install        # installs SheetJS from cdn.sheetjs.com
-npm run build      # copies the SheetJS browser bundle to public/vendor/
+npm install        # no runtime dependencies
+npm run build      # downloads the SheetJS browser bundle (0.20.3) to public/vendor/
 npm test           # unit tests for the matching logic (public/js/logic.js)
 npm run dev        # local preview with wrangler
 ```
