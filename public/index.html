@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Supplier Catalogue Validation</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%232563eb'/><path d='M9 16.5l4.5 4.5L23 11.5' stroke='white' stroke-width='3.2' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap">
+      <h1>Supplier Catalogue Validation</h1>
+      <p class="sub">Compare a supplier file with the WS Item List (report 1014). Files are processed in your browser and never uploaded.</p>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <ol class="stepper" id="stepper">
+      <li data-step="1">Upload files</li>
+      <li data-step="2">Map headers</li>
+      <li data-step="3">Map units</li>
+      <li data-step="4">Result</li>
+    </ol>
+
+    <!-- Step 1 -->
+    <section class="step" id="step-1">
+      <div class="grid-2">
+        <div class="card">
+          <h2>WS Item List <span class="tag">Report 1014</span></h2>
+          <p class="hint">Export "Item List 1014" from the supplier module.</p>
+          <label class="drop" id="drop-report" tabindex="0">
+            <input type="file" accept=".xls,.xlsx,.xlsm,.csv,.txt" hidden />
+            <span class="drop-title">Drop file here or click to browse</span>
+            <span class="drop-sub">.xlsx, .xls or .csv</span>
+          </label>
+          <div class="file-info" id="info-report"></div>
+        </div>
+        <div class="card">
+          <h2>Supplier file <span class="tag">Raw data</span></h2>
+          <p class="hint">Must contain an article number column (any header name).</p>
+          <label class="drop" id="drop-supplier" tabindex="0">
+            <input type="file" accept=".xls,.xlsx,.xlsm,.csv,.txt" hidden />
+            <span class="drop-title">Drop file here or click to browse</span>
+            <span class="drop-sub">.xlsx, .xls or .csv</span>
+          </label>
+          <div class="file-info" id="info-supplier"></div>
+        </div>
+      </div>
+      <div class="actions">
+        <span class="msg" id="msg-1"></span>
+        <button class="btn primary" id="next-1" disabled>Next: map headers</button>
+      </div>
+    </section>
+
+    <!-- Step 2 -->
+    <section class="step" id="step-2" hidden>
+      <div class="card">
+        <h2>Map headers</h2>
+        <p class="hint">Standard headers from report 1014 are on the left. Pick the matching column from each file. <strong>Article no.</strong> is the lookup key and is required.</p>
+        <div class="table-scroll">
+          <table class="map-table">
+            <thead>
+              <tr><th>Standard header</th><th>Report 1014 column</th><th>Supplier column</th></tr>
+            </thead>
+            <tbody id="header-map"></tbody>
+          </table>
+        </div>
+        <details class="options">
+          <summary>Article no. matching options</summary>
+          <label><input type="checkbox" id="opt-zeros" /> Ignore leading zeros (<code>000123</code> = <code>123</code>)</label>
+          <label><input type="checkbox" id="opt-seps" /> Ignore spaces, dashes, dots, slashes and underscores (<code>AB-12.3</code> = <code>AB123</code>)</label>
+          <p class="hint">Matching always ignores upper/lower case and surrounding spaces.</p>
+        </details>
+        <div class="preview-counts" id="preview-counts"></div>
+      </div>
+      <div class="actions">
+        <button class="btn" data-back="1">Back</button>
+        <span class="msg" id="msg-2"></span>
+        <button class="btn primary" id="next-2">Next: map units</button>
+      </div>
+    </section>
+
+    <!-- Step 3 -->
+    <section class="step" id="step-3" hidden>
+      <div class="card">
+        <h2>Map units <span class="tag">optional</span></h2>
+        <p class="hint">Units used by <strong>Existing Items</strong> in the supplier file are on the left. Pick the FutureLog unit for each. Items whose order unit differs from the WS Item List get a remark in the <strong>Unit Change</strong> column.</p>
+        <div id="unit-body"></div>
+      </div>
+      <div class="actions">
+        <button class="btn" data-back="2">Back</button>
+        <span class="msg" id="msg-3"></span>
+        <button class="btn" id="skip-3">Skip unit check</button>
+        <button class="btn primary" id="next-3">Next: create result</button>
+      </div>
+    </section>
+
+    <!-- Step 4 -->
+    <section class="step" id="step-4" hidden>
+      <div class="cards" id="result-cards"></div>
+      <div class="card">
+        <div class="result-head">
+          <h2>Preview</h2>
+          <div class="filters" id="result-filters"></div>
+        </div>
+        <div class="table-scroll tall"><table class="data-table" id="result-table"></table></div>
+        <p class="hint" id="result-note"></p>
+      </div>
+      <div class="actions">
+        <button class="btn" data-back="3">Back</button>
+        <button class="btn" id="restart">Start over</button>
+        <button class="btn primary" id="download">Download Excel</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="wrap foot">Unit list: FutureLog unit codes (126 units).</footer>
+
+  <script src="vendor/xlsx.full.min.js"></script>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

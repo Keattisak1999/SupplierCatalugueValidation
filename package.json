@@ -1,0 +1,16 @@
+{
+  "name": "supplier-catalogue-validation",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Browser tool to validate a supplier catalogue against the WS Item List (report 1014).",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/copy-vendor.mjs",
+    "test": "node --test test/*.test.mjs",
+    "dev": "npm run build && npx --yes wrangler pages dev public",
+    "deploy": "npm run build && npx --yes wrangler pages deploy public"
+  },
+  "dependencies": {
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
+  }
+}
