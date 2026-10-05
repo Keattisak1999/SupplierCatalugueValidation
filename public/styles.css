@@ -14,6 +14,8 @@
   --topbar-muted: #c9cbcf;
   --existing: #1d7a3e;
   --existing-bg: #e4f4e9;
+  --update: #8a5300;
+  --update-bg: #fde9c8;
   --new: #1d5fb8;
   --new-bg: #e5eefb;
   --only: #4b4e55;
@@ -40,6 +42,8 @@
     --topbar-muted: #a3a6ad;
     --existing: #5fd08a;
     --existing-bg: #173524;
+    --update: #ffc46b;
+    --update-bg: #3d2e12;
     --new: #8fb0ff;
     --new-bg: #1c2a4d;
     --only: #c9cbd0;
@@ -131,12 +135,13 @@ table { border-collapse: collapse; width: 100%; }
 .options label { display: block; margin: 6px 0; }
 
 .preview-counts, .cards { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 14px; }
-.cards { margin: 0 0 16px; }
+.cards { margin: 0 0 16px; align-items: stretch; }
 .count { padding: 8px 14px; border-radius: var(--radius); font-size: 13px; display: flex; align-items: baseline; gap: 8px; }
 .cards .count { flex: 1 1 160px; flex-direction: column; gap: 0; padding: 14px 16px; border: 1px solid var(--border); background: var(--surface); }
 .count b { font-size: 18px; }
 .cards .count b { font-size: 26px; }
 .count.existing { background: var(--existing-bg); color: var(--existing); }
+.count.update { background: var(--update-bg); color: var(--update); }
 .count.new { background: var(--new-bg); color: var(--new); }
 .count.only { background: var(--only-bg); color: var(--only); }
 .count.missing { background: var(--missing-bg); color: var(--missing); }
@@ -165,6 +170,7 @@ table { border-collapse: collapse; width: 100%; }
 .data-table td.warn { background: var(--warn-bg); }
 .status { font-size: 12px; font-weight: 600; padding: 1px 8px; border-radius: 99px; }
 .status.existing { background: var(--existing-bg); color: var(--existing); }
+.status.update { background: var(--update-bg); color: var(--update); }
 .status.new { background: var(--new-bg); color: var(--new); }
 .status.only { background: var(--only-bg); color: var(--only); }
 .status.missing { background: var(--missing-bg); color: var(--missing); }

@@ -4,10 +4,14 @@ import { UNITS } from './units.js';
 
 export const STATUS = {
   EXISTING: 'Existing Item',
+  // Matched only because of an Article no. matching option, so the article no. differs from WS.
+  EXISTING_UPDATE: 'Existing Item (Article need update)',
   NEW: 'New Item',
   ONLY_WS: 'Only in WS Item List',
   MISSING_ARTICLE: 'Missing Article No.',
 };
+
+export const isExisting = (status) => status === STATUS.EXISTING || status === STATUS.EXISTING_UPDATE;
 
 // Where each output column comes from; the Excel writer colours header cells by this.
 export const SOURCE = { TOOL: 'tool', SUPPLIER: 'supplier', REPORT: 'report' };
@@ -238,9 +242,19 @@ export function compareItems({ report, supplier, reportMap, supplierMap, options
       status = STATUS.MISSING_ARTICLE;
       remarks.push('Article no. is empty in supplier file');
     } else if (reportIndex.has(key)) {
-      status = STATUS.EXISTING;
       const matches = reportIndex.get(key);
-      wsRow = matches[0];
+      // Same article no. without any matching option (only case and outer spaces ignored)?
+      const plain = normalizeKey(getField(row, supplierMap, 'articleNo'));
+      const exact = matches.find((r) => normalizeKey(getField(r, reportMap, 'articleNo')) === plain);
+      wsRow = exact || matches[0];
+      if (exact) {
+        status = STATUS.EXISTING;
+      } else {
+        status = STATUS.EXISTING_UPDATE;
+        const wsArt = cellText(getField(wsRow, reportMap, 'articleNo'));
+        const supArt = cellText(getField(row, supplierMap, 'articleNo'));
+        remarks.push(`Article no. differs: WS "${wsArt}", supplier "${supArt}"`);
+      }
       if (matches.length > 1) remarks.push(`Article no. appears ${matches.length} times in WS Item List`);
     } else {
       status = STATUS.NEW;
@@ -265,6 +279,7 @@ export function summarize(result) {
   const count = (s) => result.items.filter((i) => i.status === s).length;
   return {
     existing: count(STATUS.EXISTING),
+    existingUpdate: count(STATUS.EXISTING_UPDATE),
     newItems: count(STATUS.NEW),
     missingArticle: count(STATUS.MISSING_ARTICLE),
     onlyWs: result.onlyWs.length,
@@ -289,7 +304,7 @@ export function resolveUnitCode(value, units) {
 export function existingItemUnits(result, supplierMap, units) {
   const counts = new Map();
   for (const item of result.items) {
-    if (item.status !== STATUS.EXISTING) continue;
+    if (!isExisting(item.status)) continue;
     const u = cellText(getField(item.supplierRow, supplierMap, 'orderUnit'));
     if (!u) continue;
     counts.set(u, (counts.get(u) || 0) + 1);
@@ -306,7 +321,7 @@ const unitLabel = (code, units) => {
 
 // Returns the "Unit Change" remark for an existing item, or '' when units agree.
 export function unitChangeRemark(item, { reportMap, supplierMap, unitMapping, units }) {
-  if (item.status !== STATUS.EXISTING) return '';
+  if (!isExisting(item.status)) return '';
   const supRaw = cellText(getField(item.supplierRow, supplierMap, 'orderUnit'));
   const wsRaw = cellText(getField(item.wsRow, reportMap, 'orderUnit'));
   if (!supRaw && !wsRaw) return '';
@@ -394,6 +409,7 @@ export function buildOutput({ result, report, supplier, reportMap, supplierMap, 
     [],
     ['Status', 'Count'],
     [STATUS.EXISTING, sum.existing],
+    ...(sum.existingUpdate ? [[STATUS.EXISTING_UPDATE, sum.existingUpdate]] : []),
     [STATUS.NEW, sum.newItems],
     ...(sum.missingArticle ? [[STATUS.MISSING_ARTICLE, sum.missingArticle]] : []),
     [STATUS.ONLY_WS, sum.onlyWs],

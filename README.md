@@ -23,6 +23,7 @@ All processing happens in the browser. Files are never uploaded to a server.
 | Status | Meaning | Sheet |
 |---|---|---|
 | `Existing Item` | Article no. is in both files | Supplier Validation |
+| `Existing Item (Article need update)` | Matched only because an Article no. matching option was ticked, e.g. supplier `1235-CTN` vs WS `1235`. Remark shows both article numbers | Supplier Validation |
 | `New Item` | Article no. is only in the supplier file | Supplier Validation |
 | `Only in WS Item List` | Article no. is only in report 1014 | **Only in WS Item List** (second sheet) |
 | `Missing Article No.` | Supplier row has no article no., so it cannot be looked up | Supplier Validation |

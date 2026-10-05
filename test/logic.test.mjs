@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   STATUS, autoMapHeaders, buildOutput, cellText, compareItems, detectHeaderRow,
-  existingItemUnits, normalizeKey, resolveUnitCode, tableFromAoa,
+  existingItemUnits, normalizeKey, summarize, resolveUnitCode, tableFromAoa,
 } from '../public/js/logic.js';
 import { UNITS } from '../public/js/units.js';
 
@@ -87,7 +87,14 @@ test('unit suffix option matches 1235-CTN to 1235', () => {
   const off = compareItems(ctx);
   assert.deepEqual(off.items.map((i) => i.status), [STATUS.EXISTING, STATUS.NEW]);
   const on = compareItems({ ...ctx, options: { ignoreUnitSuffix: true } });
-  assert.deepEqual(on.items.map((i) => i.status), [STATUS.EXISTING, STATUS.EXISTING]);
+  // a-100 vs A-100 is only a case difference: plain Existing Item.
+  // A-200-BAG only matched through the option: the article no. needs updating.
+  assert.deepEqual(on.items.map((i) => i.status), [STATUS.EXISTING, STATUS.EXISTING_UPDATE]);
+  assert.match(on.items[1].remarks[0], /Article no\. differs: WS "A-200", supplier "A-200-BAG"/);
+  assert.equal(summarize(on).existingUpdate, 1);
+  // Existing Item (Article need update) still takes part in the unit check.
+  const units = existingItemUnits(on, ctx.supplierMap, UNITS);
+  assert.ok(units.some((u) => u.unit === 'Bag'));
 });
 
 test('flags duplicate article numbers', () => {

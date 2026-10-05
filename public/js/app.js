@@ -188,6 +188,7 @@ function runCompare() {
 function countCards(sum) {
   return [
     el('div', { class: 'count existing' }, el('b', {}, sum.existing), STATUS.EXISTING),
+    sum.existingUpdate ? el('div', { class: 'count update' }, el('b', {}, sum.existingUpdate), STATUS.EXISTING_UPDATE) : null,
     el('div', { class: 'count new' }, el('b', {}, sum.newItems), STATUS.NEW),
     el('div', { class: 'count only' }, el('b', {}, sum.onlyWs), STATUS.ONLY_WS),
     sum.missingArticle ? el('div', { class: 'count missing' }, el('b', {}, sum.missingArticle), STATUS.MISSING_ARTICLE) : null,
@@ -281,6 +282,7 @@ function renderResult() {
 const FILTERS = [
   ['all', 'All supplier items'],
   [STATUS.EXISTING, STATUS.EXISTING],
+  [STATUS.EXISTING_UPDATE, 'Article need update'],
   [STATUS.NEW, STATUS.NEW],
   ['unit', 'Unit Change'],
   ['onlyws', STATUS.ONLY_WS],
@@ -303,7 +305,7 @@ function renderTable() {
   else if (!useOnly && state.filter !== 'all') shown = rows.filter((r) => r[0] === state.filter);
   const cols = useOnly ? header.length : Math.min(header.length, 14); // hide passthrough columns in preview
   const statusClass = (s) => ({
-    [STATUS.EXISTING]: 'existing', [STATUS.NEW]: 'new', [STATUS.ONLY_WS]: 'only', [STATUS.MISSING_ARTICLE]: 'missing',
+    [STATUS.EXISTING]: 'existing', [STATUS.EXISTING_UPDATE]: 'update', [STATUS.NEW]: 'new', [STATUS.ONLY_WS]: 'only', [STATUS.MISSING_ARTICLE]: 'missing',
   }[s] || '');
   $('#result-table').replaceChildren(
     el('thead', {}, el('tr', {}, header.slice(0, cols).map((h, i) => el('th', { class: `src-${(useOnly ? onlyWs : main).sources[i]}` }, h)))),
