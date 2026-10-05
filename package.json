@@ -9,5 +9,8 @@
     "test": "node --test test/*.test.mjs",
     "dev": "npx --yes wrangler dev",
     "deploy": "npx --yes wrangler deploy"
+  },
+  "dependencies": {
+    "exceljs": "4.4.0"
   }
 }

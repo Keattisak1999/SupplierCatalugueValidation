@@ -37,11 +37,13 @@ Matching ignores upper/lower case and spaces before or after the value.
 - **Only in WS Item List**: the report 1014 rows that are not in the supplier file.
 - **Summary**: counts per status and whether the unit check ran.
 
+Header cells are coloured by where the column's data comes from: **orange** = added by this tool (Status, Unit Change, Order Unit (FutureLog code), Remark), **blue** = supplier catalogue, **grey** = WS Item List (report 1014). The Summary sheet includes the colour legend. Data cells are left plain.
+
 ## Development
 
 ```bash
-npm install        # no runtime dependencies
-npm run build      # downloads the SheetJS browser bundle (0.20.3) to public/vendor/
+npm install        # installs ExcelJS (writes the coloured Excel output)
+npm run build      # puts SheetJS 0.20.3 (reading) and ExcelJS 4.4.0 (writing) in public/vendor/
 npm test           # unit tests for the matching logic (public/js/logic.js)
 npm run dev        # local preview with wrangler
 ```

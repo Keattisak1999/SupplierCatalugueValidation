@@ -169,3 +169,15 @@ table { border-collapse: collapse; width: 100%; }
 .status.only { background: var(--only-bg); color: var(--only); }
 .status.missing { background: var(--missing-bg); color: var(--missing); }
 select:focus, input:focus, .btn:focus-visible, .chip-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+/* Column source colours (match the Excel output) */
+:root { --src-tool: #c25100; --src-supplier: #2f6fbf; --src-report: #5f6368; }
+@media (prefers-color-scheme: dark) { :root { --src-tool: #ff9a3d; --src-supplier: #8fb0ff; --src-report: #a3a6ad; } }
+.data-table thead th.src-tool { box-shadow: inset 0 -3px 0 var(--src-tool); }
+.data-table thead th.src-supplier { box-shadow: inset 0 -3px 0 var(--src-supplier); }
+.data-table thead th.src-report { box-shadow: inset 0 -3px 0 var(--src-report); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; color: var(--muted); font-size: 13px; margin: 10px 0 0; }
+.legend .key { display: inline-flex; align-items: center; gap: 6px; color: var(--text); }
+.legend .key::before { content: ""; width: 12px; height: 12px; border-radius: 3px; background: var(--src-tool); }
+.legend .key.src-supplier::before { background: var(--src-supplier); }
+.legend .key.src-report::before { background: var(--src-report); }

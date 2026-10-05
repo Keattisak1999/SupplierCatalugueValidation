@@ -306,7 +306,7 @@ function renderTable() {
     [STATUS.EXISTING]: 'existing', [STATUS.NEW]: 'new', [STATUS.ONLY_WS]: 'only', [STATUS.MISSING_ARTICLE]: 'missing',
   }[s] || '');
   $('#result-table').replaceChildren(
-    el('thead', {}, el('tr', {}, header.slice(0, cols).map((h) => el('th', {}, h)))),
+    el('thead', {}, el('tr', {}, header.slice(0, cols).map((h, i) => el('th', { class: `src-${(useOnly ? onlyWs : main).sources[i]}` }, h)))),
     el('tbody', {}, shown.slice(0, PREVIEW_LIMIT).map((r) => el('tr', {},
       r.slice(0, cols).map((v, i) => (i === 0
         ? el('td', {}, el('span', { class: `status ${statusClass(v)}` }, v))
@@ -317,24 +317,73 @@ function renderTable() {
     : `${shown.length} rows.`;
 }
 
-$('#download').addEventListener('click', () => {
-  const wb = XLSX.utils.book_new();
-  for (const s of state.output.sheets) {
-    const ws = XLSX.utils.aoa_to_sheet(s.aoa, { cellDates: true });
-    const header = s.aoa[0] || [];
-    ws['!cols'] = header.map((h, c) => {
-      let w = cellText(h).length;
-      for (let r = 1; r < Math.min(s.aoa.length, 300); r++) w = Math.max(w, cellText(s.aoa[r][c]).length);
-      return { wch: Math.min(Math.max(w + 2, 8), 60) };
-    });
-    if (s.name !== 'Summary' && s.aoa.length > 1) {
-      ws['!autofilter'] = { ref: XLSX.utils.encode_range({ s: { r: 0, c: 0 }, e: { r: s.aoa.length - 1, c: header.length - 1 } }) };
+// Header colours in the Excel output, by where the column's data comes from.
+const SOURCE_COLORS = {
+  tool: 'FFC25100', // orange: added by this tool
+  supplier: 'FF2F6FBF', // blue: supplier catalogue
+  report: 'FF5F6368', // grey: WS Item List (report 1014)
+};
+const solid = (argb) => ({ type: 'pattern', pattern: 'solid', fgColor: { argb } });
+const headStyle = Object.fromEntries(Object.entries(SOURCE_COLORS).map(([src, argb]) => [src, {
+  fill: solid(argb), font: { bold: true, color: { argb: 'FFFFFFFF' } }, alignment: { vertical: 'middle', wrapText: true },
+}]));
+
+function columnWidths(aoa) {
+  return (aoa[0] || []).map((h, c) => {
+    let w = cellText(h).length;
+    for (let r = 1; r < Math.min(aoa.length, 300); r++) w = Math.max(w, cellText(aoa[r][c]).length);
+    return Math.min(Math.max(w + 2, 8), 60);
+  });
+}
+
+function addDataSheet(wb, sheet) {
+  const ws = wb.addWorksheet(sheet.name, { views: [{ state: 'frozen', ySplit: 1 }] });
+  const [header, ...rows] = sheet.aoa;
+  columnWidths(sheet.aoa).forEach((w, c) => { ws.getColumn(c + 1).width = w; });
+  const headRow = ws.addRow(header);
+  headRow.height = 30;
+  header.forEach((_, c) => { headRow.getCell(c + 1).style = headStyle[sheet.sources[c]]; });
+  for (const values of rows) ws.addRow(values.map((v) => (v === '' ? null : v)));
+  if (rows.length) ws.autoFilter = { from: { row: 1, column: 1 }, to: { row: 1, column: header.length } };
+}
+
+function addSummarySheet(wb, sheet) {
+  const ws = wb.addWorksheet(sheet.name);
+  ws.getColumn(1).width = 36; ws.getColumn(2).width = 40;
+  sheet.aoa.forEach((values, r) => {
+    const row = ws.addRow(values);
+    const src = sheet.rowSources[r];
+    if (r === 0) row.getCell(1).font = { bold: true, size: 14 };
+    else if (values[0] === 'Status' || values[0] === 'Header colours') row.font = { bold: true };
+    else if (src) row.getCell(1).style = headStyle[src]; // colour legend
+  });
+}
+
+$('#download').addEventListener('click', async () => {
+  const btn = $('#download');
+  btn.disabled = true;
+  try {
+    const wb = new ExcelJS.Workbook();
+    for (const s of state.output.sheets) {
+      if (s.sources) addDataSheet(wb, s);
+      else addSummarySheet(wb, s);
     }
-    XLSX.utils.book_append_sheet(wb, ws, s.name);
+    const buf = await wb.xlsx.writeBuffer();
+    const base = state.files.supplier.name.replace(/\.[^.]+$/, '');
+    const date = new Date().toISOString().slice(0, 10);
+    const a = el('a', {
+      href: URL.createObjectURL(new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })),
+      download: `Validation_${base}_${date}.xlsx`,
+    });
+    document.body.append(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+  } catch (err) {
+    $('#result-note').textContent = `Could not create the Excel file: ${err.message}`;
+  } finally {
+    btn.disabled = false;
   }
-  const base = state.files.supplier.name.replace(/\.[^.]+$/, '');
-  const date = new Date().toISOString().slice(0, 10);
-  XLSX.writeFile(wb, `Validation_${base}_${date}.xlsx`);
 });
 
 $('#restart').addEventListener('click', () => {
@@ -346,8 +395,8 @@ $('#restart').addEventListener('click', () => {
   go(1);
 });
 
-if (typeof XLSX === 'undefined') {
-  $('#msg-1').textContent = 'Spreadsheet library failed to load (vendor/xlsx.full.min.js). Run "npm run build".';
+if (typeof XLSX === 'undefined' || typeof ExcelJS === 'undefined') {
+  $('#msg-1').textContent = 'Spreadsheet libraries failed to load (public/vendor/). Run "npm run build".';
 } else {
   updateStep1();
 }

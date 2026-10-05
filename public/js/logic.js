@@ -9,6 +9,14 @@ export const STATUS = {
   MISSING_ARTICLE: 'Missing Article No.',
 };
 
+// Where each output column comes from; the Excel writer colours header cells by this.
+export const SOURCE = { TOOL: 'tool', SUPPLIER: 'supplier', REPORT: 'report' };
+export const SOURCE_LABEL = {
+  tool: 'Added by this tool',
+  supplier: 'From supplier catalogue',
+  report: 'From WS Item List (report 1014)',
+};
+
 // Standard headers, taken from report "Item List 1014".
 export const FIELDS = [
   {
@@ -335,6 +343,15 @@ export function buildOutput({ result, report, supplier, reportMap, supplierMap, 
     'Remark',
     ...extraSupplierCols.map((h) => `Supplier: ${h}`),
   ];
+  const { TOOL, SUPPLIER, REPORT } = SOURCE;
+  const mainSources = [
+    TOOL, TOOL,
+    ...std.map((k) => (k === 'wsNo' ? REPORT : SUPPLIER)),
+    TOOL,
+    REPORT, REPORT, REPORT, REPORT,
+    TOOL,
+    ...extraSupplierCols.map(() => SUPPLIER),
+  ];
   const mainRows = result.items.map((item) => {
     const s = item.supplierRow;
     const w = item.wsRow;
@@ -357,6 +374,7 @@ export function buildOutput({ result, report, supplier, reportMap, supplierMap, 
   });
 
   const onlyHeader = ['Status', ...std.map((k) => label[k]), 'Remark', ...extraReportCols];
+  const onlySources = [TOOL, ...std.map(() => REPORT), TOOL, ...extraReportCols.map(() => REPORT)];
   const onlyRows = result.onlyWs.map(({ row, remarks }) => [
     STATUS.ONLY_WS,
     ...std.map((k) => cellText(getField(row, reportMap, k))),
@@ -382,13 +400,17 @@ export function buildOutput({ result, report, supplier, reportMap, supplierMap, 
     [],
     ['Unit check', unitChecked ? 'Done' : 'Skipped'],
     ...(unitChecked ? [['Existing items with unit change', unitChanges]] : []),
+    [],
+    ['Header colours'],
+    ...[TOOL, SUPPLIER, REPORT].map((src) => [SOURCE_LABEL[src]]),
   ];
+  const summarySources = summary.map((r) => [TOOL, SUPPLIER, REPORT].find((src) => r[0] === SOURCE_LABEL[src]) || null);
 
   return {
     sheets: [
-      { name: 'Supplier Validation', aoa: [mainHeader, ...mainRows] },
-      { name: 'Only in WS Item List', aoa: [onlyHeader, ...onlyRows] },
-      { name: 'Summary', aoa: summary },
+      { name: 'Supplier Validation', aoa: [mainHeader, ...mainRows], sources: mainSources },
+      { name: 'Only in WS Item List', aoa: [onlyHeader, ...onlyRows], sources: onlySources },
+      { name: 'Summary', aoa: summary, rowSources: summarySources },
     ],
     summary: { ...sum, unitChanges },
   };

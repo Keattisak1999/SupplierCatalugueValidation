@@ -149,6 +149,20 @@ test('builds output with Unit Change remarks and separate Only in WS sheet', () 
   assert.equal(only.aoa[1][0], STATUS.ONLY_WS);
   assert.ok(only.aoa[0].includes('Price'));
   assert.equal(out.summary.unitChanges, 1);
+
+  // Every column is tagged with where its data comes from.
+  assert.equal(main.sources.length, header.length);
+  const src = (name) => main.sources[header.indexOf(name)];
+  assert.equal(src('Status'), 'tool');
+  assert.equal(src('Unit Change'), 'tool');
+  assert.equal(src('Order Unit (FutureLog code)'), 'tool');
+  assert.equal(src('Remark'), 'tool');
+  assert.equal(src('WS No.'), 'report');
+  assert.equal(src('WS Order Unit'), 'report');
+  assert.equal(src('Article no.'), 'supplier');
+  assert.equal(src('Supplier: Unit Price'), 'supplier');
+  assert.equal(only.sources.length, only.aoa[0].length);
+  assert.deepEqual([only.sources[0], only.sources[1], only.sources.at(-1)], ['tool', 'report', 'report']);
 });
 
 test('skipping unit step leaves Unit Change empty', () => {
