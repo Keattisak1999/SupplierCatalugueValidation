@@ -238,6 +238,7 @@ export function compareItems({ report, supplier, reportMap, supplierMap, options
     const remarks = [];
     let status;
     let wsRow = null;
+    let originalCode = ''; // WS article no., when it differs from the supplier's
     if (!key) {
       status = STATUS.MISSING_ARTICLE;
       remarks.push('Article no. is empty in supplier file');
@@ -251,9 +252,7 @@ export function compareItems({ report, supplier, reportMap, supplierMap, options
         status = STATUS.EXISTING;
       } else {
         status = STATUS.EXISTING_UPDATE;
-        const wsArt = cellText(getField(wsRow, reportMap, 'articleNo'));
-        const supArt = cellText(getField(row, supplierMap, 'articleNo'));
-        remarks.push(`Article no. differs: WS "${wsArt}", supplier "${supArt}"`);
+        originalCode = cellText(getField(wsRow, reportMap, 'articleNo'));
       }
       if (matches.length > 1) remarks.push(`Article no. appears ${matches.length} times in WS Item List`);
     } else {
@@ -262,7 +261,7 @@ export function compareItems({ report, supplier, reportMap, supplierMap, options
     if (key && supplierCount.get(key) > 1) {
       remarks.push(`Duplicate article no. in supplier file (${supplierCount.get(key)}x)`);
     }
-    return { status, key, supplierRow: row, wsRow, remarks };
+    return { status, key, supplierRow: row, wsRow, originalCode, remarks };
   });
 
   const onlyWs = [];
@@ -355,6 +354,7 @@ export function buildOutput({ result, report, supplier, reportMap, supplierMap, 
     'WS GTIN',
     'WS Order Unit',
     'WS Packaging unit',
+    'Original Code in 1014',
     'Remark',
     ...extraSupplierCols.map((h) => `Supplier: ${h}`),
   ];
@@ -363,7 +363,7 @@ export function buildOutput({ result, report, supplier, reportMap, supplierMap, 
     TOOL, TOOL,
     ...std.map((k) => (k === 'wsNo' ? REPORT : SUPPLIER)),
     TOOL,
-    REPORT, REPORT, REPORT, REPORT,
+    REPORT, REPORT, REPORT, REPORT, REPORT,
     TOOL,
     ...extraSupplierCols.map(() => SUPPLIER),
   ];
@@ -383,6 +383,7 @@ export function buildOutput({ result, report, supplier, reportMap, supplierMap, 
       wv('gtin'),
       wv('orderUnit'),
       wv('packagingUnit'),
+      item.originalCode,
       item.remarks.join('; '),
       ...extraSupplierCols.map((h) => s[h] ?? ''),
     ];

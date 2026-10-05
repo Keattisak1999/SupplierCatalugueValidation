@@ -303,7 +303,7 @@ function renderTable() {
   let shown = rows;
   if (state.filter === 'unit') shown = rows.filter((r) => r[1]);
   else if (!useOnly && state.filter !== 'all') shown = rows.filter((r) => r[0] === state.filter);
-  const cols = useOnly ? header.length : Math.min(header.length, 14); // hide passthrough columns in preview
+  const cols = useOnly ? header.length : Math.min(header.length, 15); // hide passthrough columns in preview
   const statusClass = (s) => ({
     [STATUS.EXISTING]: 'existing', [STATUS.EXISTING_UPDATE]: 'update', [STATUS.NEW]: 'new', [STATUS.ONLY_WS]: 'only', [STATUS.MISSING_ARTICLE]: 'missing',
   }[s] || '');

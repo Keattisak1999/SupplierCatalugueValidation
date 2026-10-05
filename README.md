@@ -23,7 +23,7 @@ All processing happens in the browser. Files are never uploaded to a server.
 | Status | Meaning | Sheet |
 |---|---|---|
 | `Existing Item` | Article no. is in both files | Supplier Validation |
-| `Existing Item (Article need update)` | Matched only because an Article no. matching option was ticked, e.g. supplier `1235-CTN` vs WS `1235`. Remark shows both article numbers | Supplier Validation |
+| `Existing Item (Article need update)` | Matched only because an Article no. matching option was ticked, e.g. supplier `1235-CTN` vs WS `1235`. The WS article no. is shown in the **Original Code in 1014** column | Supplier Validation |
 | `New Item` | Article no. is only in the supplier file | Supplier Validation |
 | `Only in WS Item List` | Article no. is only in report 1014 | **Only in WS Item List** (second sheet) |
 | `Missing Article No.` | Supplier row has no article no., so it cannot be looked up | Supplier Validation |
@@ -34,7 +34,7 @@ Matching ignores upper/lower case and spaces before or after the value.
 
 ## Output workbook
 
-- **Supplier Validation**: Status, Unit Change, the 6 standard fields (supplier values; WS No. taken from report 1014), Order Unit (FutureLog code), WS Item name / GTIN / Order Unit / Packaging unit for comparison, Remark (duplicates, missing values), then all remaining supplier columns.
+- **Supplier Validation**: Status, Unit Change, the 6 standard fields (supplier values; WS No. taken from report 1014), Order Unit (FutureLog code), WS Item name / GTIN / Order Unit / Packaging unit for comparison, Original Code in 1014 (WS article no. when it differs from the supplier's), Remark (duplicates, missing values), then all remaining supplier columns.
 - **Only in WS Item List**: the report 1014 rows that are not in the supplier file.
 - **Summary**: counts per status and whether the unit check ran.
 

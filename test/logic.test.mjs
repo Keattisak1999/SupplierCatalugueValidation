@@ -90,7 +90,14 @@ test('unit suffix option matches 1235-CTN to 1235', () => {
   // a-100 vs A-100 is only a case difference: plain Existing Item.
   // A-200-BAG only matched through the option: the article no. needs updating.
   assert.deepEqual(on.items.map((i) => i.status), [STATUS.EXISTING, STATUS.EXISTING_UPDATE]);
-  assert.match(on.items[1].remarks[0], /Article no\. differs: WS "A-200", supplier "A-200-BAG"/);
+  assert.equal(on.items[1].originalCode, 'A-200');
+  assert.deepEqual(on.items[1].remarks, []);
+  const out = buildOutput({ ...ctx, result: on, unitMapping: null, units: UNITS });
+  const [hdr, , row2] = out.sheets[0].aoa;
+  assert.equal(row2[hdr.indexOf('Article no.')], 'A-200-BAG');
+  assert.equal(row2[hdr.indexOf('Original Code in 1014')], 'A-200');
+  assert.equal(out.sheets[0].sources[hdr.indexOf('Original Code in 1014')], 'report');
+  assert.equal(hdr.indexOf('Original Code in 1014') + 1, hdr.indexOf('Remark'));
   assert.equal(summarize(on).existingUpdate, 1);
   // Existing Item (Article need update) still takes part in the unit check.
   const units = existingItemUnits(on, ctx.supplierMap, UNITS);
