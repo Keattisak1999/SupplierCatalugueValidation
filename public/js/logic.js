@@ -1,5 +1,6 @@
 // Pure data logic for the supplier catalogue validation tool.
 // No DOM and no SheetJS dependency, so it runs in the browser and in Node tests.
+import { UNITS } from './units.js';
 
 export const STATUS = {
   EXISTING: 'Existing Item',
@@ -177,8 +178,22 @@ export function autoMapHeaders(headers) {
   return map;
 }
 
+// Single-word unit spellings that may trail an article number, e.g. "1235-CTN".
+const UNIT_SUFFIXES = new Set([
+  ...UNITS.map((u) => u.code.toUpperCase()),
+  ...UNITS.map((u) => u.name.toUpperCase()).filter((n) => /^[A-Z]+$/.test(n)),
+  ...Object.keys(UNIT_ALIASES),
+]);
+
+// "1235-CTN" -> "1235". Only strips when the trailing word is a known unit.
+export function stripUnitSuffix(s) {
+  const m = s.match(/^(.*?[^\s\-_./])[\s\-_./]+([A-Z]+)$/);
+  return m && UNIT_SUFFIXES.has(m[2]) ? m[1] : s;
+}
+
 export function normalizeKey(value, opts = {}) {
   let s = cellText(value).toUpperCase();
+  if (opts.ignoreUnitSuffix) s = stripUnitSuffix(s);
   if (opts.ignoreSeparators) s = s.replace(/[\s\-_./]+/g, '');
   else s = s.replace(/\s+/g, ' ');
   if (opts.ignoreLeadingZeros) s = s.replace(/^0+(?=.)/, '');

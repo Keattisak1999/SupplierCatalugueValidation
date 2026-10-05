@@ -62,6 +62,13 @@ test('normalizeKey options', () => {
   assert.equal(normalizeKey('000123', { ignoreLeadingZeros: true }), '123');
   assert.equal(normalizeKey('0', { ignoreLeadingZeros: true }), '0');
   assert.equal(normalizeKey('AB-12.3', { ignoreSeparators: true }), 'AB123');
+  assert.equal(normalizeKey('1235-CTN', { ignoreUnitSuffix: true }), '1235');
+  assert.equal(normalizeKey('1235/pcs', { ignoreUnitSuffix: true }), '1235');
+  assert.equal(normalizeKey('1235 Bottle', { ignoreUnitSuffix: true }), '1235');
+  assert.equal(normalizeKey('1235-CTN', {}), '1235-CTN');
+  assert.equal(normalizeKey('AB-XYZ', { ignoreUnitSuffix: true }), 'AB-XYZ'); // not a unit
+  assert.equal(normalizeKey('CTN', { ignoreUnitSuffix: true }), 'CTN'); // nothing before it
+  assert.equal(normalizeKey('001235-CTN', { ignoreUnitSuffix: true, ignoreLeadingZeros: true, ignoreSeparators: true }), '1235');
 });
 
 test('assigns Existing / New / Only in WS statuses by article no.', () => {
@@ -72,6 +79,15 @@ test('assigns Existing / New / Only in WS statuses by article no.', () => {
   ]);
   assert.equal(result.onlyWs.length, 1);
   assert.equal(result.onlyWs[0].row['Article no.'], 'A-999');
+});
+
+test('unit suffix option matches 1235-CTN to 1235', () => {
+  const ctx = setup();
+  ctx.supplier = tableFromAoa([...supplierAoa.slice(0, 2), ['A-200-BAG', 'Rice', '', 'Bag', '', 1]], 0);
+  const off = compareItems(ctx);
+  assert.deepEqual(off.items.map((i) => i.status), [STATUS.EXISTING, STATUS.NEW]);
+  const on = compareItems({ ...ctx, options: { ignoreUnitSuffix: true } });
+  assert.deepEqual(on.items.map((i) => i.status), [STATUS.EXISTING, STATUS.EXISTING]);
 });
 
 test('flags duplicate article numbers', () => {

@@ -20,7 +20,7 @@ const state = {
   files: { report: null, supplier: null }, // { name, workbook, sheet, headerRow, aoa, table }
   reportMap: {},
   supplierMap: {},
-  options: { ignoreLeadingZeros: false, ignoreSeparators: false },
+  options: { ignoreLeadingZeros: false, ignoreSeparators: false, ignoreUnitSuffix: false },
   result: null,
   unitMapping: {},
   unitSkipped: false,
@@ -168,10 +168,12 @@ function renderHeaderMap() {
   }));
   $('#opt-zeros').checked = state.options.ignoreLeadingZeros;
   $('#opt-seps').checked = state.options.ignoreSeparators;
+  $('#opt-unit').checked = state.options.ignoreUnitSuffix;
   updatePreview();
 }
 $('#opt-zeros').addEventListener('change', (e) => { state.options.ignoreLeadingZeros = e.target.checked; updatePreview(); });
 $('#opt-seps').addEventListener('change', (e) => { state.options.ignoreSeparators = e.target.checked; updatePreview(); });
+$('#opt-unit').addEventListener('change', (e) => { state.options.ignoreUnitSuffix = e.target.checked; updatePreview(); });
 
 function runCompare() {
   return compareItems({

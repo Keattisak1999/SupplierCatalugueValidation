@@ -14,7 +14,7 @@ All processing happens in the browser. Files are never uploaded to a server.
 
 1. **Upload files.** Drop both files. For each file, pick the sheet and header row.
 2. **Map headers.** The standard headers from report 1014 are listed on the left: *WS No., Item name, Article no., GTIN, Order Unit, Packaging unit*. Each is mapped to a column in report 1014 (auto-detected) and to a column in the supplier file (chosen from a dropdown). **Article no.** is required. A live preview shows the status counts as you map.
-   Optional matching settings: ignore leading zeros, and ignore spaces, dashes and dots.
+   Optional matching settings: ignore leading zeros; ignore spaces, dashes and dots; ignore a unit after the code (`1235-CTN` = `1235`, only when the trailing word is a known unit such as CTN, PCS, KG or Bottle).
 3. **Map units (optional, can be skipped).** Each distinct order unit used by the supplier's *Existing Items* is shown on the left. Pick the FutureLog unit for each from the dropdown (126 units from `data/Unit_List.xls`). Common spellings are suggested automatically, e.g. `PCS → PC`, `Litre → LI`, `Bag → BT`.
 4. **Result.** Preview the result, filter by status, and download the Excel file.
 
